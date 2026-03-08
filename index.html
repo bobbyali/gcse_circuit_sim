@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Circuit Explorer</title>
+    <meta name="description"
+        content="Learn about Voltage, Current, and Resistance with interactive series and parallel circuit simulators.">
+    <link rel="stylesheet" href="styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="background-animation"></div>
+    <header>
+        <h1>⚡ Circuit Explorer</h1>
+        <p>Master Voltage (V), Current (I), and Resistance (R)</p>
+    </header>
+
+    <main>
+        <section id="basics" class="glass-panel">
+            <h2>The Basics: Ohm's Law</h2>
+            <div class="concept-cards">
+                <div class="card card-voltage">
+                    <div class="card-icon">🔋</div>
+                    <h3>Voltage (V)</h3>
+                    <p>The <strong>pressure</strong> pushing electrons through the circuit.</p>
+                    <span class="unit">Measured in <strong>Volts (V)</strong></span>
+                </div>
+                <div class="card card-current">
+                    <div class="card-icon">🌊</div>
+                    <h3>Current (I)</h3>
+                    <p>The <strong>flow</strong> of electrons traveling through the wires.</p>
+                    <span class="unit">Measured in <strong>Amps (A)</strong></span>
+                </div>
+                <div class="card card-resistance">
+                    <div class="card-icon">🧱</div>
+                    <h3>Resistance (R)</h3>
+                    <p>The <strong>obstacle</strong> slowing down the flow of electrons.</p>
+                    <span class="unit">Measured in <strong>Ohms (Ω)</strong></span>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-item">
+                    <span class="highlight-v">V</span> = <span class="highlight-i">I</span> × <span
+                        class="highlight-r">R</span>
+                </div>
+                <p>Voltage equals Current times Resistance.</p>
+            </div>
+
+            <div class="legend-box" style="margin-top: 2rem;">
+                <h3>Wire Color Legend (Voltage Potential)</h3>
+                <p>Wires change color based on how much "pressure" (Voltage) is left at that point in the circuit.</p>
+                <div class="color-scale">
+                    <div class="scale-bar"></div>
+                    <div class="scale-labels">
+                        <span>High Voltage (Source)</span>
+                        <span>0V (Return)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="series-circuit" class="glass-panel simulator-section">
+            <h2>🔗 Series Circuit Simulator</h2>
+            <p>In a series circuit, there is only <strong>one path</strong> for the electrons. If you add more
+                resistors, the total resistance increases, and the current drops. The voltage is shared among resistors.
+            </p>
+
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="series-voltage">Source Voltage (V): <span id="series-v-val">12</span>V</label>
+                    <input type="range" id="series-voltage" min="1" max="24" value="12" step="1">
+                </div>
+                <button id="add-series-resistor" class="action-btn">+ Add Resistor</button>
+                <button id="remove-series-resistor" class="action-btn error-btn">- Remove Resistor</button>
+            </div>
+
+            <div id="series-circuit-viz" class="circuit-visualization series">
+                <div class="battery">
+                    <span class="term pos">+</span>
+                    <span class="battery-label" id="series-batt-label">12V</span>
+                    <span class="term neg">-</span>
+                </div>
+                <div id="series-elements-container"
+                    style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
+                    <!-- Wires injected here -->
+                </div>
+                <div id="series-resistors-container" class="resistors-container">
+                    <!-- Resistors will be injected here -->
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stat"><span class="label">Total Resistance (R_eq):</span> <span class="value"
+                        id="series-req">0</span> Ω</div>
+                <div class="stat"><span class="label">Total Current (I):</span> <span class="value highlight-i"
+                        id="series-itot">0</span> A</div>
+            </div>
+
+            <div id="series-breakdown" class="breakdown-grid">
+                <!-- Breakdown per resistor -->
+            </div>
+        </section>
+
+        <section id="parallel-circuit" class="glass-panel simulator-section">
+            <h2>🛤️ Parallel Circuit Simulator</h2>
+            <p>In a parallel circuit, there are <strong>multiple paths</strong> (branches). Adding more branches
+                <em>decreases</em> the total resistance, allowing more current to flow. The voltage is the same across
+                all branches.
+            </p>
+
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="parallel-voltage">Source Voltage (V): <span id="parallel-v-val">12</span>V</label>
+                    <input type="range" id="parallel-voltage" min="1" max="24" value="12" step="1">
+                </div>
+                <button id="add-parallel-resistor" class="action-btn">+ Add Branch</button>
+                <button id="remove-parallel-resistor" class="action-btn error-btn">- Remove Branch</button>
+            </div>
+
+            <div id="parallel-circuit-viz" class="circuit-visualization parallel">
+                <div class="battery">
+                    <span class="term pos">+</span>
+                    <span class="battery-label" id="parallel-batt-label">12V</span>
+                    <span class="term neg">-</span>
+                </div>
+                <div id="parallel-elements-container"
+                    style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
+                    <!-- Wires injected here -->
+                </div>
+                <div id="parallel-resistors-container" class="branches-container">
+                    <!-- Parallel branches injected here -->
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stat"><span class="label">Equivalent Resistance (R_eq):</span> <span class="value"
+                        id="parallel-req">0</span> Ω</div>
+                <div class="stat"><span class="label">Total Current (I from battery):</span> <span
+                        class="value highlight-i" id="parallel-itot">0</span> A</div>
+            </div>
+
+            <div id="parallel-breakdown" class="breakdown-grid">
+                <!-- Breakdown per resistor -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Built for learning, experimenting, and mastering electricity! 💡</p>
+    </footer>
+
+    <div id="hover-tooltip" class="tooltip hidden">
+        <strong>Point Info:</strong><br>
+        <span class="highlight-v">Voltage: <span id="tt-v">0</span>V</span><br>
+        <span class="highlight-i">Current: <span id="tt-i">0</span>A</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

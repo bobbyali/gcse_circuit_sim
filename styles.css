@@ -1,0 +1,571 @@
+:root {
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+
+    --c-voltage: #fbbf24;
+    --c-current: #38bdf8;
+    --c-resistance: #f87171;
+
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+
+    --accent: #8b5cf6;
+    --accent-hover: #7c3aed;
+    --error: #ef4444;
+    --error-hover: #dc2626;
+
+    --wire-color: #94a3b8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+    padding-bottom: 2rem;
+}
+
+/* Background Animation */
+.background-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.15), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.15), transparent 25%);
+    z-index: -1;
+    animation: pulseBg 10s infinite alternate;
+}
+
+@keyframes pulseBg {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+header {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0) 100%);
+}
+
+header h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(to right, var(--c-voltage), var(--c-current));
+    -webkit-background-clip: text;
+    color: transparent;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 40px rgba(251, 191, 36, 0.3);
+}
+
+header p {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.glass-panel {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--glass-border);
+    padding-bottom: 0.5rem;
+}
+
+/* Basics Section */
+.concept-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.card {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid var(--glass-border);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+}
+
+.card-voltage::before {
+    background: var(--c-voltage);
+}
+
+.card-current::before {
+    background: var(--c-current);
+}
+
+.card-resistance::before {
+    background: var(--c-resistance);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.card .unit {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.875rem;
+}
+
+.formula-box {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 2rem;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.formula-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.highlight-v {
+    color: var(--c-voltage);
+}
+
+.highlight-i {
+    color: var(--c-current);
+}
+
+.highlight-r {
+    color: var(--c-resistance);
+}
+
+/* Simulators controls */
+.controls-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-end;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+}
+
+.control-group {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: var(--c-voltage);
+    cursor: pointer;
+}
+
+.action-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.action-btn:hover {
+    background: var(--accent-hover);
+}
+
+.error-btn {
+    background: var(--error);
+}
+
+.error-btn:hover {
+    background: var(--error-hover);
+}
+
+/* Circuit Visualization Base */
+.circuit-visualization {
+    position: relative;
+    background: #020617;
+    border-radius: 12px;
+    padding: 4rem 2rem;
+    margin: 2rem 0;
+    border: 2px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    overflow: hidden;
+}
+
+.battery {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 100px;
+    background: #334155;
+    border: 3px solid #64748b;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    z-index: 10;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+}
+
+.battery::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 15px;
+    right: 15px;
+    height: 10px;
+    background: #64748b;
+    border-radius: 4px 4px 0 0;
+}
+
+.term {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.term.pos {
+    color: var(--c-voltage);
+}
+
+.term.neg {
+    color: #94a3b8;
+}
+
+.battery-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: bold;
+    color: white;
+}
+
+/* Dynamic Wires */
+.wire {
+    position: absolute;
+    background-color: var(--wire-color);
+    transition: background-color 0.3s;
+    overflow: hidden;
+    z-index: 1;
+    /* Under resistors */
+}
+
+/* Electron Flow Overlays */
+.electron-flow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    opacity: 0.9;
+}
+
+.flow-r {
+    background-image: linear-gradient(90deg, transparent 50%, rgba(255, 255, 255, 0.9) 50%);
+    background-size: 20px 100%;
+}
+
+.flow-l {
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 50%, transparent 50%);
+    background-size: 20px 100%;
+}
+
+.flow-d {
+    background-image: linear-gradient(180deg, transparent 50%, rgba(255, 255, 255, 0.9) 50%);
+    background-size: 100% 20px;
+}
+
+.flow-u {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 50%, transparent 50%);
+    background-size: 100% 20px;
+}
+
+@keyframes animate-flow-r {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 20px 0;
+    }
+}
+
+@keyframes animate-flow-l {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: -20px 0;
+    }
+}
+
+@keyframes animate-flow-d {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 0 20px;
+    }
+}
+
+@keyframes animate-flow-u {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 0 -20px;
+    }
+}
+
+/* Resistors */
+.resistor-wrapper {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    background: #020617;
+    /* match viz background to cover wire cleanly */
+    padding: 0 10px;
+    z-index: 5;
+}
+
+.resistor {
+    width: 60px;
+    height: 30px;
+    background: repeating-linear-gradient(90deg, #d97706, #d97706 10px, #b45309 10px, #b45309 20px);
+    border: 2px solid #78350f;
+    border-radius: 8px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s;
+}
+
+.resistor:hover {
+    transform: scale(1.1);
+}
+
+.resistor-input {
+    width: 70px;
+    background: #1e293b;
+    border: 1px solid #475569;
+    color: white;
+    text-align: center;
+    padding: 4px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+}
+
+/* Parallel Specfic Styles */
+.parallel-branch-resistor {
+    flex-direction: row;
+    /* For standing vertically */
+    padding: 10px 0;
+}
+
+.parallel-branch-resistor .resistor {
+    transform: rotate(90deg);
+}
+
+.parallel-branch-resistor .resistor:hover {
+    transform: rotate(90deg) scale(1.1);
+}
+
+.parallel-branch-resistor .resistor-input {
+    margin-left: 20px;
+}
+
+
+/* Stats Panels */
+.stats-panel {
+    display: flex;
+    justify-content: space-around;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-top: 1.5rem;
+    border: 1px solid var(--glass-border);
+}
+
+.stat {
+    font-size: 1.2rem;
+}
+
+.stat .label {
+    color: var(--text-secondary);
+}
+
+.stat .value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.resistor-stat-card {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+}
+
+.resistor-stat-card h4 {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-family: 'Outfit', sans-serif;
+}
+
+footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--glass-border);
+    margin-top: 2rem;
+}
+
+/* Legend & Tooltip */
+.legend-box {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--glass-border);
+}
+
+.legend-box h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.legend-box p {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.color-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.scale-bar {
+    height: 20px;
+    width: 100%;
+    border-radius: 10px;
+    background: linear-gradient(to right, hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), hsl(180, 100%, 50%), hsl(240, 100%, 50%));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: bold;
+}
+
+.tooltip {
+    position: fixed;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid var(--glass-border);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 1000;
+    transition: opacity 0.2s;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+}
+
+.tooltip.hidden {
+    opacity: 0;
+}
