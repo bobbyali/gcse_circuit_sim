@@ -55,9 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getAnimationSpeed(current, maxCurrent) {
         if (current < 0.001) return 'none';
-        // Speed scaling (higher current = shorter duration = faster flow) // speed limit to prevent strobe
-        let ratio = Math.max(0.05, Math.min(1, current / Math.max(0.1, maxCurrent)));
-        let duration = Math.max(0.3, 3.5 - (ratio * 3.2)); // 0.3s clamp
+        // Speed scaling (higher current = shorter duration = faster flow)
+        let ratio = Math.max(0.02, Math.min(1, current / Math.max(0.1, maxCurrent)));
+        // Make the difference more pronounced: max speed 0.3s, min speed 6.0s
+        let duration = Math.max(0.3, 6.0 - (ratio * 5.7));
         return duration + 's';
     }
 
@@ -264,17 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { left: '50px', bottom: '50%', height: 'calc(50% - 50px)', width: '4px' },
             cHighV, 'flow-u', 'animate-flow-u', itotSpeedStr, voltage, itot
         ));
-        // Main TOP (all high V)
-        pElementsContainer.appendChild(createWire(
-            { left: '50px', right: '50px', top: '50px', height: '4px' },
-            cHighV, 'flow-r', 'animate-flow-r', itotSpeedStr, voltage, itot
-        ));
-        // Bottom LEFT path
-        pElementsContainer.appendChild(createWire(
-            { left: '50px', right: '50px', bottom: '50px', height: '4px' },
-            cLowV, 'flow-l', 'animate-flow-l', itotSpeedStr, 0, itot
-        ));
-        // Battery DOWN
+        // Battery DOWN (Return)
         pElementsContainer.appendChild(createWire(
             { left: '50px', top: '50%', height: 'calc(50% - 50px)', width: '4px' },
             cLowV, 'flow-u', 'animate-flow-u', itotSpeedStr, 0, itot
@@ -287,10 +278,28 @@ document.addEventListener('DOMContentLoaded', () => {
             positions.push(10 + (i + 1) * (80 / (n + 1))); // range from 10% to 90%
         }
 
+        let lPct = 0;
+        let currentTop = itot;
+        let currentBottom = itot;
+
         parallelState.resistors.forEach((r, index) => {
             let rPct = positions[index];
             let iBranch = voltage / r; // Current splits! Voltage is constant.
             let branchSpeed = getAnimationSpeed(iBranch, 5);
+
+            // Segment Top Horizontal Wire
+            let topSpeed = getAnimationSpeed(currentTop, 5);
+            pElementsContainer.appendChild(createWire(
+                { left: `calc(50px + (100% - 100px) * ${(lPct) / 100})`, width: `calc((100% - 100px) * ${(rPct - lPct) / 100})`, top: '50px', height: '4px' },
+                cHighV, 'flow-r', 'animate-flow-r', topSpeed, voltage, currentTop
+            ));
+
+            // Segment Bottom Horizontal Wire
+            let btmSpeed = getAnimationSpeed(currentBottom, 5);
+            pElementsContainer.appendChild(createWire(
+                { left: `calc(50px + (100% - 100px) * ${(lPct) / 100})`, width: `calc((100% - 100px) * ${(rPct - lPct) / 100})`, bottom: '50px', height: '4px' },
+                cLowV, 'flow-l', 'animate-flow-l', btmSpeed, 0, currentBottom
+            ));
 
             // Draw Top Half of Branch (High V)
             pElementsContainer.appendChild(createWire(
@@ -326,7 +335,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div>Current: <span class="highlight-i">${iBranch.toFixed(2)}A</span></div>
             `;
             pBreakdown.appendChild(card);
+
+            currentTop = Math.max(0, currentTop - iBranch); // Prevent negative due to floating pt
+            currentBottom = Math.max(0, currentBottom - iBranch);
+            lPct = rPct;
         });
+
+        // Dangling Top Wire past the last branch (0A)
+        pElementsContainer.appendChild(createWire(
+            { left: `calc(50px + (100% - 100px) * ${(lPct) / 100})`, right: '50px', top: '50px', height: '4px' },
+            cHighV, 'flow-r', 'animate-flow-r', getAnimationSpeed(0, 5), voltage, 0
+        ));
+
+        // Dangling Bottom Wire past the last branch (0A)
+        pElementsContainer.appendChild(createWire(
+            { left: `calc(50px + (100% - 100px) * ${(lPct) / 100})`, right: '50px', bottom: '50px', height: '4px' },
+            cLowV, 'flow-l', 'animate-flow-l', getAnimationSpeed(0, 5), 0, 0
+        ));
 
         // Add event listeners
         const inputs = pResContainer.querySelectorAll('.resistor-input');
