@@ -324,7 +324,7 @@ input[type="range"] {
     /* Under resistors */
 }
 
-/* Electron Flow Overlays */
+/* Electron Flow — JS particle system */
 .electron-flow {
     position: absolute;
     top: 0;
@@ -332,66 +332,99 @@ input[type="range"] {
     right: 0;
     bottom: 0;
     pointer-events: none;
-    opacity: 0.9;
+    overflow: hidden;
 }
 
-.flow-r {
-    background-image: linear-gradient(90deg, transparent 50%, rgba(255, 255, 255, 0.9) 50%);
-    background-size: 20px 100%;
+/* Individual electron dot */
+.electron-particle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffffff, rgba(180, 220, 255, 0.85));
+    box-shadow: 0 0 5px 2px rgba(200, 235, 255, 0.7);
+    will-change: transform;
+    pointer-events: none;
 }
 
-.flow-l {
-    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 50%, transparent 50%);
-    background-size: 20px 100%;
-}
-
-.flow-d {
-    background-image: linear-gradient(180deg, transparent 50%, rgba(255, 255, 255, 0.9) 50%);
-    background-size: 100% 20px;
-}
-
-.flow-u {
-    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 50%, transparent 50%);
-    background-size: 100% 20px;
-}
-
-@keyframes animate-flow-r {
-    from {
-        background-position: 0 0;
+/* Particles travel the full dimension of their container wire */
+@keyframes particle-flow-r {
+    0% {
+        transform: translateX(-8px) translateY(-50%);
+        opacity: 0;
     }
 
-    to {
-        background-position: 20px 0;
-    }
-}
-
-@keyframes animate-flow-l {
-    from {
-        background-position: 0 0;
+    5% {
+        opacity: 1;
     }
 
-    to {
-        background-position: -20px 0;
+    95% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(calc(var(--w, 200px) + 8px)) translateY(-50%);
+        opacity: 0;
     }
 }
 
-@keyframes animate-flow-d {
-    from {
-        background-position: 0 0;
+@keyframes particle-flow-l {
+    0% {
+        transform: translateX(calc(var(--w, 200px) + 8px)) translateY(-50%);
+        opacity: 0;
     }
 
-    to {
-        background-position: 0 20px;
+    5% {
+        opacity: 1;
+    }
+
+    95% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(-8px) translateY(-50%);
+        opacity: 0;
     }
 }
 
-@keyframes animate-flow-u {
-    from {
-        background-position: 0 0;
+@keyframes particle-flow-d {
+    0% {
+        transform: translateX(-50%) translateY(-8px);
+        opacity: 0;
     }
 
-    to {
-        background-position: 0 -20px;
+    5% {
+        opacity: 1;
+    }
+
+    95% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(-50%) translateY(calc(var(--h, 100px) + 8px));
+        opacity: 0;
+    }
+}
+
+@keyframes particle-flow-u {
+    0% {
+        transform: translateX(-50%) translateY(calc(var(--h, 100px) + 8px));
+        opacity: 0;
+    }
+
+    5% {
+        opacity: 1;
+    }
+
+    95% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(-50%) translateY(-8px);
+        opacity: 0;
     }
 }
 

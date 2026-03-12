@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Series Circuit State ---
     const seriesState = {
-        voltage: 12,
-        resistors: [10, 20] // Default two resistors in Ohms
+        voltage: 15,
+        resistors: [10, 5] // Default two resistors in Ohms
     };
 
     // --- Parallel Circuit State ---
     const parallelState = {
         voltage: 12,
-        resistors: [10, 10] // Default two branches
+        resistors: [10, 30] // Default two branches
     };
 
     // --- DOM Elements: Series ---
@@ -53,31 +53,80 @@ document.addEventListener('DOMContentLoaded', () => {
         return `hsl(${hue}, 100%, 50%)`;
     }
 
-    function getAnimationSpeed(current, maxCurrent) {
-        if (current < 0.001) return 'none';
-        // Speed scaling (higher current = shorter duration = faster flow)
-        let ratio = Math.max(0.02, Math.min(1, current / Math.max(0.1, maxCurrent)));
-        // Make the difference more pronounced: max speed 0.3s, min speed 6.0s
-        let duration = Math.max(0.3, 6.0 - (ratio * 5.7));
-        return duration + 's';
+    function getAnimationSpeed(current) {
+        if (current < 0.001) return 'none'; // No current = no flow
+
+        // Typical classroom current range: ~0.3A (high-R) to ~2.4A (low-R)
+        const MAX_VISUAL_CURRENT = 2.4;
+
+        // Linear ratio 0→1
+        let ratio = Math.max(0.03, Math.min(1, current / MAX_VISUAL_CURRENT));
+
+        // Exponential boost: compress slow currents toward 0, pull fast ones to 1
+        // pow < 1 exaggerates differences in the low-current range
+        let boosted = Math.pow(ratio, 0.35);
+
+        // Map boosted ratio to duration: 1.0 boosted -> 0.2s (very fast), 0 -> 5.5s (nearly still)
+        let duration = 5.5 - (boosted * 5.3);
+
+        return Math.max(0.2, duration) + 's';
     }
 
-    function createFlowOverlay(directionClass, animationName, speed) {
-        if (speed === 'none') {
-            return `<div class="electron-flow ${directionClass}"></div>`;
+    // direction: 'r' | 'l' | 'd' | 'u'
+    function createParticles(container, direction, speed, isVertical) {
+        if (speed === 'none') return; // zero current = no particles
+
+        // Number of particles scales with speed: faster = more dots visible at once
+        const durationSec = parseFloat(speed);
+        // Aim for a particle to enter roughly every 300ms
+        const count = Math.max(2, Math.round(durationSec / 0.3));
+
+        for (let k = 0; k < count; k++) {
+            const dot = document.createElement('span');
+            dot.className = 'electron-particle';
+
+            // Position orthogonally centred on the wire
+            if (isVertical) {
+                dot.style.left = '50%';
+                dot.style.top = '0';
+            } else {
+                dot.style.top = '50%';
+                dot.style.left = '0';
+            }
+
+            const animName = `particle-flow-${direction}`;
+            const delay = -(durationSec * k / count); // negative delay = pre-started
+            dot.style.animation = `${animName} ${speed} linear ${delay}s infinite`;
+            container.appendChild(dot);
         }
-        return `<div class="electron-flow ${directionClass}" style="animation: ${animationName} ${speed} linear infinite;"></div>`;
     }
 
     function createWire(styleObj, color, directionClass, animationName, speed, v, i) {
         const div = document.createElement('div');
         div.className = 'wire';
         div.style.backgroundColor = color;
-        // Apply supplied styles
         for (const [key, value] of Object.entries(styleObj)) {
             div.style[key] = value;
         }
-        div.innerHTML = createFlowOverlay(directionClass, animationName, speed);
+
+        // Build electron-flow container and spawn particles into it
+        const flowContainer = document.createElement('div');
+        flowContainer.className = `electron-flow ${directionClass}`;
+        const direction = directionClass.replace('flow-', ''); // 'r','l','d','u'
+        const isVertical = direction === 'u' || direction === 'd';
+        createParticles(flowContainer, direction, speed, isVertical);
+        div.appendChild(flowContainer);
+
+        // After layout, measure actual pixel dimensions and set CSS vars on particles
+        // so the keyframe calc(var(--w)) / calc(var(--h)) resolves to the right distance
+        requestAnimationFrame(() => {
+            const w = div.offsetWidth + 'px';
+            const h = div.offsetHeight + 'px';
+            flowContainer.querySelectorAll('.electron-particle').forEach(p => {
+                p.style.setProperty('--w', w);
+                p.style.setProperty('--h', h);
+            });
+        });
 
         // Tooltip logic
         div.style.pointerEvents = 'auto'; // ensure it can be hovered (container is none)
@@ -108,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let req = seriesState.resistors.reduce((sum, r) => sum + r, 0);
         let itot = req > 0 ? seriesState.voltage / req : 0;
-        let speedStr = getAnimationSpeed(itot, 5); // Base max speed on 5A
+        let speedStr = getAnimationSpeed(itot);
         let voltage = seriesState.voltage;
 
         // Update Labels & Math logic displays
@@ -254,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         pBreakdown.innerHTML = '';
 
-        let itotSpeedStr = getAnimationSpeed(itot, 5); // Total speed
+        let itotSpeedStr = getAnimationSpeed(itot);
 
         // Main Wires Construction
         const cHighV = getVoltageColor(voltage, voltage); // Source V color
@@ -285,17 +334,17 @@ document.addEventListener('DOMContentLoaded', () => {
         parallelState.resistors.forEach((r, index) => {
             let rPct = positions[index];
             let iBranch = voltage / r; // Current splits! Voltage is constant.
-            let branchSpeed = getAnimationSpeed(iBranch, 5);
+            let branchSpeed = getAnimationSpeed(iBranch);
 
             // Segment Top Horizontal Wire
-            let topSpeed = getAnimationSpeed(currentTop, 5);
+            let topSpeed = getAnimationSpeed(currentTop);
             pElementsContainer.appendChild(createWire(
                 { left: `calc(50px + (100% - 100px) * ${(lPct) / 100})`, width: `calc((100% - 100px) * ${(rPct - lPct) / 100})`, top: '50px', height: '4px' },
                 cHighV, 'flow-r', 'animate-flow-r', topSpeed, voltage, currentTop
             ));
 
             // Segment Bottom Horizontal Wire
-            let btmSpeed = getAnimationSpeed(currentBottom, 5);
+            let btmSpeed = getAnimationSpeed(currentBottom);
             pElementsContainer.appendChild(createWire(
                 { left: `calc(50px + (100% - 100px) * ${(lPct) / 100})`, width: `calc((100% - 100px) * ${(rPct - lPct) / 100})`, bottom: '50px', height: '4px' },
                 cLowV, 'flow-l', 'animate-flow-l', btmSpeed, 0, currentBottom
